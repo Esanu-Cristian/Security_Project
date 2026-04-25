@@ -1,0 +1,15 @@
+-----------
+
+Proiectul respectiv utilizeaza 3 tipuri diferite de atacuri simultan asupra serverului:
+
+1) Primul atac este de tip DoS si anume resource exhaustion prin trimiterea de pachete de cate 64KB fiecare.
+
+2) Al doilea atac este de tip Data Pollution care populeaza tabelul bazei de date cu date alterate si are scopul de a consuma incet tot spatiul de memorie al serverului si a distruge integritatea bazei de date.
+
+3) Al treilea tip de atac este de tip IDOR (Insecure Direct Object Reference) care in primul rand are ca scop furtul de date, dar totodata urmareste si supraincarcarea serverului cu task-uri pentru a favoriza atacul de tip DoS.
+
+-----------
+
+Initial am capturat traficul de internet cu ajutorul Wireshark si am observat ca pe portul 8000 se trimiteau pachete in care se continea plaintext de tip “receive-12345678901234567\” si “data-12345678901234567-itp-24/12/2001-passed\”. Ulterior am dedus ca “receive-12345678901234567\” cere serverului informatii despre istoricul unui anume autovehicul pe baza codului VIN, iar “data-12345678901234567-itp-24/12/2001-passed\” ii trimite serverului inregistrari despre autovehicule pentru ca acesta sa le salveze in baza sa de date.
+
+Ulterior am creat un fisier python exploit.py care porneste cate 3 procese de CLI pentru fiecare tip de atac in parte. Astfel am obtinut 9 thread-uri de CLI din care se lanseaza atacurile care fac serverul sa nu mai poata receptiona si nici trimite date catre aplicatia mobila. In acelasi timp baza de date este populata cu date alterate, iar memoria acesteia creste constant ceea ce in timp va consuma tot spatiul de pe discul de memorie al serverului, facand astfel serverul nefunctional.
